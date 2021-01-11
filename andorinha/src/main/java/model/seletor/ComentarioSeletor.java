@@ -2,6 +2,8 @@ package model.seletor;
 
 import java.util.Calendar;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class ComentarioSeletor {
 
 	private Integer id;
@@ -14,10 +16,10 @@ public class ComentarioSeletor {
 	private Integer pagina; // 3
 
 	public boolean possuiFiltro() {
-		return this.id != null || 
-				(this.conteudo != null && !this.conteudo.trim().isEmpty() && idUsuario != null && idTweet != null);
+		return this.id != null || this.idTweet != null || this.idUsuario != null || this.data != null
+				|| !StringUtils.isBlank(this.conteudo);
 	}
-	
+
 	public Integer getId() {
 		return id;
 	}
