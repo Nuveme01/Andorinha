@@ -144,7 +144,7 @@ public class TestUsuarioRepository {
 		assertThat( user.getNome() ).isEqualTo("Usuário 1");
 		assertThat( user.getId() ).isEqualTo(ID_USUARIO_CONSULTA);
 		
-		assertThat( user.getTweets() ).isNotNull().isNotEmpty();
+//		assertThat( user.getTweets() ).isNotNull().isNotEmpty();
 	}
 	
 
