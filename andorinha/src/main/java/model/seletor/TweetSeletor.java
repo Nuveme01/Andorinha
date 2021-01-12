@@ -2,7 +2,9 @@ package model.seletor;
 
 import java.util.Calendar;
 
-public class TweetSeletor {
+import org.apache.commons.lang3.StringUtils;
+
+public class TweetSeletor extends AbstractBaseSeletor{
 
 	private Integer id;
 	private String conteudo;
@@ -10,7 +12,7 @@ public class TweetSeletor {
 	private Integer idUsuario;
 	
 	public boolean possuiFiltro() {
-		return id != null || idUsuario != null;
+		return id != null || !StringUtils.isBlank(this.getConteudo());
 	}
 
 	public Integer getId() {

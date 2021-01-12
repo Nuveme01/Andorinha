@@ -125,10 +125,25 @@ public class TestComentarioRepository {
 		seletor.setIdTweet(2);
 		seletor.setIdUsuario(1);
 
-		List<Comentario> comentario = this.comentarioRepository.pesquisar(seletor);
+		List<Comentario> comentarios = this.comentarioRepository.pesquisar(seletor);
 
-		assertThat(comentario).isNotNull().isNotEmpty().hasSize(1);
+		assertThat(comentarios).isNotNull().isNotEmpty().hasSize(1).extracting("conteudo")
+				.containsExactly("Comentário 5");
 
+		comentarios.stream().forEach(t -> {
+			assertThat(t.getData()).isNotNull().isLessThan(Calendar.getInstance());
+			assertThat(t.getUsuario()).isNotNull();
+			assertThat(t.getTweet()).isNotNull();
+			assertThat(t.getTweet().getUsuario()).isNotNull();
+		});
+
+	}
+	
+	public void testa_contar_comentario() {
+		ComentarioSeletor seletor = new ComentarioSeletor();
+		seletor.setId(1);
+		
+		assertThat(this.comentarioRepository.contar(seletor)).isNotNull().isEqualTo(1L);
 	}
 
 }

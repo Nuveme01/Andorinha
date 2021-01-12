@@ -3,120 +3,44 @@ package repository;
 import java.util.List;
 
 import javax.ejb.Stateless;
-import javax.persistence.Query;
 
 import model.Comentario;
 import model.dto.ComentarioDTO;
-import model.exceptions.ErroAoConectarNaBaseException;
-import model.exceptions.ErroAoConsultarBaseException;
 import model.seletor.ComentarioSeletor;
+import repository.base.AbstractCrudRepository;
 
 @Stateless
-public class ComentarioRepository extends AbstractCrudRepository {
+public class ComentarioRepository extends AbstractCrudRepository<Comentario> {
 
-	public void inserir(Comentario comentario) {
-		super.em.persist(comentario);
+	public List<Comentario> pesquisar(ComentarioSeletor seletor) {
+
+		return super.createEntityQuery().innerJoinFetch("usuario")
+				.innerJoinFetch("tweet")
+				.equal("id", seletor.getId())
+				.like("conteudo", seletor.getConteudo())
+				.equal("data", seletor.getData())
+				.equal("usuario.id", seletor.getIdUsuario())
+				.equal("tweet.id", seletor.getIdTweet())
+				.setFirstResult(seletor.getOffset())
+				.setMaxResults(seletor.getLimite())
+				.list();
 	}
 
-	public void atualizar(Comentario comentario) {
-		super.em.merge(comentario);
-	}
-
-	public void remover(int id) {
-		Comentario comentario = super.em.find(Comentario.class, id);
-		super.em.remove(comentario);
-	}
-
-	public Comentario consultar(int id) {
-		return super.em.find(Comentario.class, id);
-	}
-
-	public List<Comentario> pesquisar(ComentarioSeletor seletor)
-			throws ErroAoConsultarBaseException, ErroAoConectarNaBaseException {
-
-		StringBuilder jpql = new StringBuilder();
-		jpql.append("SELECT c FROM Comentario c ");
-		jpql.append("INNER JOIN FETCH c.usuario ");
-		jpql.append("INNER JOIN FETCH c.tweet t ");
-		jpql.append("INNER JOIN FETCH t.usuario ");
-
-		this.criarFiltro(jpql, seletor);
-
-		Query query = super.em.createQuery(jpql.toString());
-
-		this.adicionarParametros(query, seletor);
-
-		return query.getResultList();
-	}
-
-	public List<ComentarioDTO> pesquisarDTO(ComentarioSeletor seletor)
-			throws ErroAoConsultarBaseException, ErroAoConectarNaBaseException {
-
-		StringBuilder jpql = new StringBuilder();
-		jpql.append("SELECT new model.dto.ComentarioDTO(c.id, t.id, u.id, u.nome, c.data, c.conteudo) ");
-		jpql.append("FROM Comentario c ");
-		jpql.append("INNER JOIN c.usuario u ");
-		jpql.append("INNER JOIN c.tweet t ");
-		jpql.append("INNER JOIN t.usuario ");
-
-		this.criarFiltro(jpql, seletor);
-
-		Query query = super.em.createQuery(jpql.toString());
-
-		this.adicionarParametros(query, seletor);
-
-		return query.getResultList();
-	}
-
-	private void adicionarParametros(Query query, ComentarioSeletor seletor) {
-
-		if (seletor.possuiFiltro()) {
-			if (seletor.getIdUsuario() != null) {
-				query.setParameter("id_usuario", seletor.getIdUsuario());
-			}
-
-			if (seletor.getIdTweet() != null) {
-				query.setParameter("id_tweet", seletor.getIdTweet());
-			}
-		}
+	public List<ComentarioDTO> pesquisarDTO(ComentarioSeletor seletor) {
+		return super.createTupleQuery()
+				.select("id", "tweet.id as idTweet", "usuario.id as idUsuario", "usuario.nome as nomeUsuario", "data",
+						"conteudo as comentario")
+				.join("usuario").join("tweet").equal("id", seletor.getId()).list(ComentarioDTO.class);
 
 	}
-
-	private void criarFiltro(StringBuilder jpql, ComentarioSeletor seletor) {
-		if (seletor.possuiFiltro()) {
-			jpql.append("WHERE ");
-			boolean primeiro = true;
-			if (seletor.getIdUsuario() != null) {
-				jpql.append("c.usuario.id = :id_usuario ");
-			}
-
-			if (seletor.getIdTweet() != null) {
-				if (primeiro) {
-					jpql.append("AND ");
-				}
-				jpql.append("c.tweet.id = :id_tweet ");
-			}
-
-		}
+	
+	public Long contar(ComentarioSeletor seletor) {
+		return super.createCountQuery()
+				.equal("id", seletor.getId())
+				.equal("usuario.id", seletor.getIdUsuario())
+				.equal("tweet.id", seletor.getIdTweet())
+				.equal("data", seletor.getData())
+				.like("conteudo", seletor.getConteudo())
+				.count();
 	}
-
-	public Long contar(ComentarioSeletor seletor) throws ErroAoConsultarBaseException, ErroAoConectarNaBaseException {
-
-		StringBuilder jpql = new StringBuilder();
-
-		jpql.append("SELECT COUNT(c) FROM Comentario c ");
-
-		this.criarFiltro(jpql, seletor);
-
-		Query query = super.em.createQuery(jpql.toString());
-
-		this.adicionarParametros(query, seletor);
-
-		return (Long) query.getSingleResult();
-	}
-
-	public List<Comentario> listarTodos() throws ErroAoConsultarBaseException, ErroAoConectarNaBaseException {
-		return this.pesquisar(new ComentarioSeletor());
-	}
-
 }
