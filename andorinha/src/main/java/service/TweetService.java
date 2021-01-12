@@ -14,8 +14,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import model.Tweet;
+import model.dto.TweetDTO;
 import model.exceptions.ErroAoConectarNaBaseException;
 import model.exceptions.ErroAoConsultarBaseException;
+import model.seletor.TweetSeletor;
 import repository.TweetRepository;
 
 @Path("/tweet")
@@ -59,4 +61,19 @@ public class TweetService {
 		this.tweetRepository.remover(id);
 	}
 
+	@POST
+	@Path("/pesquisar")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<Tweet> pesquisar(TweetSeletor seletor){
+		return this.tweetRepository.pesquisar(seletor);
+	}
+	
+	@POST
+	@Path("/dto")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<TweetDTO> pesquisarDTO(TweetSeletor seletor){
+		return this.tweetRepository.pesquisarDTO(seletor);
+	}
 }

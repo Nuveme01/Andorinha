@@ -14,6 +14,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import model.Comentario;
+import model.dto.ComentarioDTO;
 import model.exceptions.ErroAoConectarNaBaseException;
 import model.exceptions.ErroAoConsultarBaseException;
 import model.seletor.ComentarioSeletor;
@@ -68,5 +69,14 @@ public class ComentarioService {
 	public List<Comentario> pesquisar(ComentarioSeletor seletor)
 			throws ErroAoConsultarBaseException, ErroAoConectarNaBaseException {
 		return this.comentarioRepository.pesquisar(seletor);
+	}
+	
+	@POST
+	@Path("/dto")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<ComentarioDTO> pesquisarDTO(ComentarioSeletor seletor)
+			throws ErroAoConsultarBaseException, ErroAoConectarNaBaseException {
+		return this.comentarioRepository.pesquisarDTO(seletor);
 	}
 }
