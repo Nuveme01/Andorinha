@@ -11,9 +11,12 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.SecurityContext;
 
 import model.Tweet;
+import model.Usuario;
 import model.dto.TweetDTO;
 import model.exceptions.ErroAoConectarNaBaseException;
 import model.exceptions.ErroAoConsultarBaseException;
@@ -26,6 +29,9 @@ public class TweetService {
 	@EJB
 	TweetRepository tweetRepository;
 
+	@Context
+	private SecurityContext context;
+
 	@GET
 	@Consumes(MediaType.APPLICATION_JSON)
 	public List<Tweet> listarTodos() throws ErroAoConsultarBaseException, ErroAoConectarNaBaseException {
@@ -36,6 +42,7 @@ public class TweetService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Tweet inserir(Tweet tweet) throws ErroAoConsultarBaseException, ErroAoConectarNaBaseException {
+		tweet.setUsuario((Usuario) this.context.getUserPrincipal());
 		this.tweetRepository.inserir(tweet);
 		return tweet;
 	}
@@ -65,15 +72,15 @@ public class TweetService {
 	@Path("/pesquisar")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Tweet> pesquisar(TweetSeletor seletor){
+	public List<Tweet> pesquisar(TweetSeletor seletor) {
 		return this.tweetRepository.pesquisar(seletor);
 	}
-	
+
 	@POST
 	@Path("/dto")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<TweetDTO> pesquisarDTO(TweetSeletor seletor){
+	public List<TweetDTO> pesquisarDTO(TweetSeletor seletor) {
 		return this.tweetRepository.pesquisarDTO(seletor);
 	}
 }
